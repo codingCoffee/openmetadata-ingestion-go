@@ -1,0 +1,11 @@
+# Dev image for working on omingest inside a container (see docker-compose.yml).
+# Bakes in the air rebuild-on-change watcher so the dev service can just run it.
+FROM golang:1.26.4-trixie
+
+# Install air (rebuild-on-change watcher). Pinned via @latest at build time;
+# the resulting binary lands in $GOPATH/bin (/go/bin), which is already on PATH.
+RUN go install github.com/air-verse/air@latest
+
+WORKDIR /workspace
+
+CMD ["air"]

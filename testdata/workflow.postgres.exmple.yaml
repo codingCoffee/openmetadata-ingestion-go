@@ -1,0 +1,38 @@
+# Example workflow config, compatible with the Python openmetadata-ingestion format.
+source:
+  type: postgres
+  serviceName: local_postgres
+  serviceConnection:
+    config:
+      type: PostgreSQL
+      username: postgres
+      authType:
+        password: postgres
+      hostPort: localhost:5432
+      database: postgres
+      ingestAllDatabases: false
+      sslMode: disable
+  sourceConfig:
+    config:
+      type: DatabaseMetadata
+      markDeletedTables: false
+      includeTables: true
+      includeViews: true
+      schemaFilterPattern:
+        includes:
+          - public
+        excludes:
+          - "^pg_"
+      tableFilterPattern:
+        excludes:
+          - "_tmp$"
+sink:
+  type: metadata-rest
+  config: {}
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: "http://localhost:8585/api"
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: "replace-with-bot-jwt-token"

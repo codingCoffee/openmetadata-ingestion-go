@@ -1,0 +1,55 @@
+# Postgres-only test instance for exercising omingest.
+#
+#   docker compose up -d
+#   omingest test-connection -c testdata/workflow.postgres.yaml
+#   omingest ingest          -c testdata/workflow.postgres.yaml
+#
+# The seed script in ./test creates several databases, schemas, tables, views,
+# comments and primary keys so you can test extraction, filtering, and the
+# ingestAllDatabases option. Credentials match testdata/workflow.postgres.yaml.
+#
+# Tear down with `docker compose down` (add -v to also wipe the data volume).
+
+volumes:
+  pg-data:
+  go-mod-cache:
+  go-build-cache:
+
+services:
+  dev:
+    container_name: omingest_dev
+    # air (rebuild-on-change watcher) is baked into this image; see Dockerfile.dev.
+    # Exec into the container in another shell to run the freshly built binary:
+    #   docker compose exec dev bash
+    #   omingest test-connection -c testdata/workflow.postgres.yaml
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    container_name: omingest_test_postgres
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      # Scripts here run once, in alphabetical order, on first startup.
+      - ./test:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10

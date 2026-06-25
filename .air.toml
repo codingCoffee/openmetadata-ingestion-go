@@ -1,0 +1,25 @@
+# Air config for the dev container — auto-rebuilds the omingest binary on save.
+#
+# omingest is a CLI (it runs a subcommand and exits), so air is used purely as a
+# rebuild-on-change watcher: it compiles to /usr/local/bin/omingest and then runs
+# a no-op notice instead of executing the binary. Just `docker compose exec dev
+# omingest <subcommand>` in another shell to use the freshly built binary.
+
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -buildvcs=false -o /usr/local/bin/omingest ./cmd/omingest"
+  # Don't run the CLI — air requires a run step, so just print a notice.
+  full_bin = "printf '\\n>> omingest rebuilt at /usr/local/bin/omingest\\n'"
+  include_ext = ["go", "yaml", "yml"]
+  exclude_dir = ["tmp", "node_modules", "test", "testdata", ".git"]
+  delay = 500
+  stop_on_error = true
+  send_interrupt = false
+
+[screen]
+  clear_on_rebuild = false
+
+[log]
+  time = true

@@ -1,0 +1,10 @@
+# Built binary
+/omingest
+/omingest-static
+
+# Go build/test artifacts
+*.out
+*.test
+
+# air watcher scratch dir
+/tmp/
