@@ -3,6 +3,7 @@ package sink
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/open-metadata/openmetadata-sdk/openmetadata-go-client/pkg/ometa"
 
@@ -34,7 +35,15 @@ func NewMetadataREST(cfg config.OpenMetadataServerConfig) (Sink, error) {
 	if cfg.HostPort == "" {
 		return nil, fmt.Errorf("openMetadataServerConfig.hostPort is required")
 	}
-	client := ometa.NewClient(cfg.HostPort, ometa.WithToken(cfg.SecurityConfig.JWTToken))
+	// The Python ingestion config format (which we mirror) sets hostPort with an
+	// "/api" suffix, e.g. "http://host:8585/api". The SDK backend appends "/api/v1"
+	// itself, so passing the suffixed value through verbatim doubles it into
+	// ".../api/api/v1/..." and the server returns 404/405. Strip a trailing "/api"
+	// (and surrounding slashes) so both forms of hostPort resolve correctly.
+	baseURL := strings.TrimRight(cfg.HostPort, "/")
+	baseURL = strings.TrimSuffix(baseURL, "/api")
+	baseURL = strings.TrimRight(baseURL, "/")
+	client := ometa.NewClient(baseURL, ometa.WithToken(cfg.SecurityConfig.JWTToken))
 	return &MetadataREST{client: client}, nil
 }
 
@@ -66,7 +75,7 @@ func (m *MetadataREST) UpsertDatabase(ctx context.Context, serviceFQN string, db
 	if err != nil {
 		return "", err
 	}
-	return fqn.Build(serviceFQN, db.Name), nil
+	return fqn.Append(serviceFQN, db.Name), nil
 }
 
 func (m *MetadataREST) UpsertSchema(ctx context.Context, dbFQN string, schema *model.Schema) (string, error) {
@@ -78,7 +87,7 @@ func (m *MetadataREST) UpsertSchema(ctx context.Context, dbFQN string, schema *m
 	if err != nil {
 		return "", err
 	}
-	return fqn.Build(dbFQN, schema.Name), nil
+	return fqn.Append(dbFQN, schema.Name), nil
 }
 
 func (m *MetadataREST) UpsertTable(ctx context.Context, schemaFQN string, table *model.Table) (string, error) {
@@ -99,7 +108,7 @@ func (m *MetadataREST) UpsertTable(ctx context.Context, schemaFQN string, table 
 	if _, err := m.client.Tables.CreateOrUpdate(ctx, body); err != nil {
 		return "", err
 	}
-	return fqn.Build(schemaFQN, table.Name), nil
+	return fqn.Append(schemaFQN, table.Name), nil
 }
 
 func (m *MetadataREST) columns(table *model.Table) []ometa.Column {

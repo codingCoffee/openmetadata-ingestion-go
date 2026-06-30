@@ -22,3 +22,26 @@ func TestBuild(t *testing.T) {
 		})
 	}
 }
+
+func TestAppend(t *testing.T) {
+	tests := []struct {
+		name      string
+		parentFQN string
+		part      string
+		want      string
+	}{
+		// The parent FQN already contains dots; Append must not re-quote it.
+		{"extends dotted parent", "local_postgres.postgres", "public", "local_postgres.postgres.public"},
+		{"chained levels", "local_postgres.postgres.public", "active_customers", "local_postgres.postgres.public.active_customers"},
+		{"quotes only new dotted part", "svc.db", "my.schema", `svc.db."my.schema"`},
+		{"empty parent", "", "svc", "svc"},
+		{"empty part returns parent", "svc.db", "", "svc.db"},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := Append(tc.parentFQN, tc.part); got != tc.want {
+				t.Errorf("Append(%q, %q) = %q, want %q", tc.parentFQN, tc.part, got, tc.want)
+			}
+		})
+	}
+}
