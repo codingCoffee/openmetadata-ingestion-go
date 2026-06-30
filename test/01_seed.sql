@@ -10,11 +10,20 @@
 --
 -- Exercises: multiple DBs/schemas, tables + a view, varied column types,
 -- table/column comments, primary keys, and a "_tmp" table for filter testing.
+--
+-- Also creates a least-privilege, read-only login role "omingest_ro" (see the
+-- bottom of each database section) so you can run the binary as a user that can
+-- only read metadata + SELECT, never write. Local test credentials only.
 
 -- =====================================================================
 -- Default database: postgres
 -- =====================================================================
 \connect postgres
+
+-- Read-only role used to test the binary with limited privileges. Cluster-wide,
+-- so created once here; CONNECT / USAGE / SELECT grants are applied per database
+-- below, after each one's tables exist. Password is for the local test DB only.
+CREATE ROLE omingest_ro WITH LOGIN PASSWORD 'omingest_ro';
 
 CREATE TABLE public.customers (
     id          bigint PRIMARY KEY,
@@ -50,12 +59,21 @@ CREATE TABLE public.orders_tmp (
     id bigint PRIMARY KEY
 );
 
-INSERT INTO public.customers (id, email, full_name, balance) VALUES
-    (1, 'a@example.com', 'Customer A', 100.50),
-    (2, 'b@example.com', 'Customer B', 250.00);
+INSERT INTO public.customers (id, email, full_name, is_active, balance, metadata) VALUES
+    (1, 'a@example.com', 'Customer A', true,  100.50, '{"tier": "gold"}'),
+    (2, 'b@example.com', 'Customer B', true,  250.00, '{"tier": "silver"}'),
+    (3, 'c@example.com', 'Customer C', false,   0.00, '{"tier": "bronze"}');
 INSERT INTO public.orders (id, customer_id, total, status) VALUES
-    (1, 1, 50.25, 'PAID'),
-    (2, 2, 75.00, 'PENDING');
+    (1, 1,  50.25, 'PAID'),
+    (2, 2,  75.00, 'PENDING'),
+    (3, 1, 120.00, 'PAID'),
+    (4, 3,  19.99, 'CANCELLED');
+
+-- Read-only grants for this database (omingest_ro can read metadata + SELECT).
+GRANT CONNECT ON DATABASE postgres TO omingest_ro;
+GRANT USAGE ON SCHEMA public TO omingest_ro;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO omingest_ro;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO omingest_ro;
 
 -- =====================================================================
 -- Second database: sales
@@ -70,6 +88,17 @@ CREATE TABLE public.invoices (
     issued_on   date
 );
 COMMENT ON TABLE public.invoices IS 'Issued invoices';
+
+INSERT INTO public.invoices (id, amount, currency, issued_on) VALUES
+    (1, 1500.00, 'INR', DATE '2026-01-15'),
+    (2,  990.50, 'INR', DATE '2026-02-01'),
+    (3,  250.00, 'USD', DATE '2026-02-20');
+
+-- Read-only grants for this database.
+GRANT CONNECT ON DATABASE sales TO omingest_ro;
+GRANT USAGE ON SCHEMA public TO omingest_ro;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO omingest_ro;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO omingest_ro;
 
 -- =====================================================================
 -- Third database: inventory (with a non-public schema)
@@ -86,3 +115,14 @@ CREATE TABLE reporting.items (
     price       numeric(10, 2)
 );
 COMMENT ON TABLE reporting.items IS 'Inventory items with stock levels';
+
+INSERT INTO reporting.items (sku, name, qty_on_hand, price) VALUES
+    ('SKU-001', 'Widget', 120,  9.99),
+    ('SKU-002', 'Gadget',  45, 24.50),
+    ('SKU-003', 'Gizmo',    0,  4.75);
+
+-- Read-only grants for this database (note: items lives in the reporting schema).
+GRANT CONNECT ON DATABASE inventory TO omingest_ro;
+GRANT USAGE ON SCHEMA reporting TO omingest_ro;
+GRANT SELECT ON ALL TABLES IN SCHEMA reporting TO omingest_ro;
+ALTER DEFAULT PRIVILEGES IN SCHEMA reporting GRANT SELECT ON TABLES TO omingest_ro;

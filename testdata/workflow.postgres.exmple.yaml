@@ -5,10 +5,10 @@ source:
   serviceConnection:
     config:
       type: PostgreSQL
-      username: postgres
+      username: omingest_ro
       authType:
-        password: postgres
-      hostPort: localhost:5432
+        password: omingest_ro
+      hostPort: postgres:5432
       database: postgres
       ingestAllDatabases: false
       sslMode: disable

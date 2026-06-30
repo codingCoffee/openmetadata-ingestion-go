@@ -10,11 +10,6 @@
 #
 # Tear down with `docker compose down` (add -v to also wipe the data volume).
 
-volumes:
-  pg-data:
-  go-mod-cache:
-  go-build-cache:
-
 services:
   dev:
     container_name: omingest_dev
@@ -28,8 +23,6 @@ services:
     working_dir: /workspace
     volumes:
       - .:/workspace
-      - go-mod-cache:/go/pkg/mod
-      - go-build-cache:/root/.cache/go-build
     depends_on:
       postgres:
         condition: service_healthy
@@ -45,7 +38,6 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pg-data:/var/lib/postgresql/data
       # Scripts here run once, in alphabetical order, on first startup.
       - ./test:/docker-entrypoint-initdb.d:ro
     healthcheck:
