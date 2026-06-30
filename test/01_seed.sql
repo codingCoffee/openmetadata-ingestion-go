@@ -20,9 +20,12 @@
 -- =====================================================================
 \connect postgres
 
--- Read-only role used to test the binary with limited privileges. Cluster-wide,
--- so created once here; CONNECT / USAGE / SELECT grants are applied per database
--- below, after each one's tables exist. Password is for the local test DB only.
+-- Metadata-only role used to test the binary with minimal privileges. omingest
+-- reads only the pg_catalog system catalogs (which are world-readable and not
+-- privilege-filtered) and never reads table rows, so CONNECT to each database is
+-- all it needs -- no SELECT (which would expose data) and no schema USAGE.
+-- Cluster-wide role, created once; CONNECT is granted per database below.
+-- Password is for the local test DB only.
 CREATE ROLE omingest_ro WITH LOGIN PASSWORD 'omingest_ro';
 
 CREATE TABLE public.customers (
@@ -69,11 +72,8 @@ INSERT INTO public.orders (id, customer_id, total, status) VALUES
     (3, 1, 120.00, 'PAID'),
     (4, 3,  19.99, 'CANCELLED');
 
--- Read-only grants for this database (omingest_ro can read metadata + SELECT).
+-- Metadata-only: connecting is enough; pg_catalog needs no table/schema grants.
 GRANT CONNECT ON DATABASE postgres TO omingest_ro;
-GRANT USAGE ON SCHEMA public TO omingest_ro;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO omingest_ro;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO omingest_ro;
 
 -- =====================================================================
 -- Second database: sales
@@ -94,11 +94,8 @@ INSERT INTO public.invoices (id, amount, currency, issued_on) VALUES
     (2,  990.50, 'INR', DATE '2026-02-01'),
     (3,  250.00, 'USD', DATE '2026-02-20');
 
--- Read-only grants for this database.
+-- Metadata-only: CONNECT is enough.
 GRANT CONNECT ON DATABASE sales TO omingest_ro;
-GRANT USAGE ON SCHEMA public TO omingest_ro;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO omingest_ro;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO omingest_ro;
 
 -- =====================================================================
 -- Third database: inventory (with a non-public schema)
@@ -121,8 +118,6 @@ INSERT INTO reporting.items (sku, name, qty_on_hand, price) VALUES
     ('SKU-002', 'Gadget',  45, 24.50),
     ('SKU-003', 'Gizmo',    0,  4.75);
 
--- Read-only grants for this database (note: items lives in the reporting schema).
+-- Metadata-only: CONNECT is enough (items lives in the reporting schema, but no
+-- schema USAGE or SELECT is required to read its metadata from pg_catalog).
 GRANT CONNECT ON DATABASE inventory TO omingest_ro;
-GRANT USAGE ON SCHEMA reporting TO omingest_ro;
-GRANT SELECT ON ALL TABLES IN SCHEMA reporting TO omingest_ro;
-ALTER DEFAULT PRIVILEGES IN SCHEMA reporting GRANT SELECT ON TABLES TO omingest_ro;
