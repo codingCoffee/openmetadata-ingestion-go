@@ -1,3 +1,5 @@
+.envrc
+
 # Built binary
 /omingest
 /omingest-static
