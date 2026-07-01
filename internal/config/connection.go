@@ -36,9 +36,6 @@ type BaseConnection struct {
 	IngestAllDatabases bool     `yaml:"ingestAllDatabases"`
 }
 
-// Password resolves the connection password, preferring the OPENMETADATA_DB_PASSWORD
-// environment variable (or a connection-scoped override handled by callers) over the
-// value embedded in YAML, so secrets need not be stored in the config file.
 func (b BaseConnection) Password() string {
 	return b.AuthType.Password
 }
