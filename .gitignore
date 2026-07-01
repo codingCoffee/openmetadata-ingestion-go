@@ -10,3 +10,10 @@
 
 # air watcher scratch dir
 /tmp/
+
+# goreleaser build output
+/dist/
+
+# local tooling / scaffolding (not part of the repo)
+/.claude/
+/node_modules/
