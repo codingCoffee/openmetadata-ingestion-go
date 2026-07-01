@@ -1,6 +1,7 @@
 // Package fqn builds OpenMetadata fully-qualified names. An FQN joins hierarchy
-// parts with dots; any part that itself contains a dot is wrapped in double quotes
-// so the separator stays unambiguous.
+// parts with dots; any part that itself contains a dot (or a double quote) is
+// wrapped in double quotes, with embedded quotes doubled, so the separator stays
+// unambiguous.
 package fqn
 
 import "strings"
@@ -35,10 +36,12 @@ func Append(parentFQN, part string) string {
 }
 
 // quote wraps a single FQN name component in double quotes if it contains the
-// dot separator, so the part stays unambiguous within the joined FQN.
+// dot separator or an embedded double quote, so the part stays unambiguous
+// within the joined FQN. Embedded double quotes are escaped by doubling them
+// ("" ), matching OpenMetadata's FQN quoting convention.
 func quote(part string) string {
-	if strings.Contains(part, ".") {
-		return `"` + part + `"`
+	if strings.Contains(part, ".") || strings.Contains(part, `"`) {
+		return `"` + strings.ReplaceAll(part, `"`, `""`) + `"`
 	}
 	return part
 }

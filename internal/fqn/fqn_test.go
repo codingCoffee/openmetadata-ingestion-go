@@ -11,6 +11,8 @@ func TestBuild(t *testing.T) {
 		{"simple", []string{"svc", "db", "schema", "table"}, "svc.db.schema.table"},
 		{"empty parts skipped", []string{"svc", "", "schema"}, "svc.schema"},
 		{"quotes dotted part", []string{"svc", "my.db", "t"}, `svc."my.db".t`},
+		{"escapes embedded quote", []string{"svc", `a.b"c`, "t"}, `svc."a.b""c".t`},
+		{"quotes part with only quote", []string{"svc", `a"b`, "t"}, `svc."a""b".t`},
 		{"single", []string{"svc"}, "svc"},
 		{"none", nil, ""},
 	}
