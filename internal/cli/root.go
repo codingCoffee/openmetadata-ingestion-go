@@ -75,6 +75,7 @@ func newIngestCmd() *cobra.Command {
 				"databases", stats.Databases,
 				"schemas", stats.Schemas,
 				"tables", stats.Tables,
+				"failedTables", stats.FailedTables,
 			)
 			return nil
 		},

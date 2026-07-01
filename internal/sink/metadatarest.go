@@ -115,12 +115,20 @@ func (m *MetadataREST) columns(table *model.Table) []ometa.Column {
 	cols := make([]ometa.Column, 0, len(table.Columns))
 	for _, c := range table.Columns {
 		mapped := typemap.Map(m.serviceType, c.DataType)
+		length := mapped.Length
+		if length == nil && needsDataLength(mapped.DataType) {
+			// OpenMetadata rejects char/varchar/binary/varbinary columns with a null
+			// dataLength (API 400). Some sources report these types without a length
+			// (e.g. an unbounded Postgres "character varying"), so default to 1 to keep
+			// the column ingestable, matching OpenMetadata's own ingestion behaviour.
+			length = ometa.Int32(1)
+		}
 		col := ometa.Column{
 			Name:            c.Name,
 			DataType:        mapped.DataType,
 			DataTypeDisplay: strPtr(mapped.Display),
 			Description:     strPtr(c.Description),
-			DataLength:      mapped.Length,
+			DataLength:      length,
 			Precision:       mapped.Precision,
 			Scale:           mapped.Scale,
 		}
@@ -130,6 +138,18 @@ func (m *MetadataREST) columns(table *model.Table) []ometa.Column {
 		cols = append(cols, col)
 	}
 	return cols
+}
+
+// needsDataLength reports whether OpenMetadata requires a non-null dataLength for
+// the given column data type.
+func needsDataLength(dt ometa.ColumnDataType) bool {
+	switch dt {
+	case ometa.ColumnDataTypeCHAR, ometa.ColumnDataTypeVARCHAR,
+		ometa.ColumnDataTypeBINARY, ometa.ColumnDataTypeVARBINARY:
+		return true
+	default:
+		return false
+	}
 }
 
 func tableType(isView bool) *ometa.CreateTableTableType {

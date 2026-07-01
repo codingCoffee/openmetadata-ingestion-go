@@ -32,6 +32,9 @@ type Stats struct {
 	Databases int
 	Schemas   int
 	Tables    int
+	// FailedTables counts tables skipped because their upsert failed. The run
+	// continues past such failures rather than aborting.
+	FailedTables int
 }
 
 // Run extracts from the source and pushes the full hierarchy to the sink.
@@ -71,13 +74,19 @@ func (w *Workflow) Run(ctx context.Context) (Stats, error) {
 			stats.Schemas++
 			w.log.Debug("upserted schema", "schema", schemaFQN)
 
+			var upserted int
 			for _, table := range schema.Tables {
 				if _, err := w.sink.UpsertTable(ctx, schemaFQN, table); err != nil {
-					return stats, fmt.Errorf("upserting table %q in %q: %w", table.Name, schemaFQN, err)
+					// A single table failing (e.g. an unsupported column type the
+					// server rejects) must not abort the whole run: log it and move on.
+					stats.FailedTables++
+					w.log.Error("skipping table", "table", table.Name, "schema", schemaFQN, "err", err)
+					continue
 				}
 				stats.Tables++
+				upserted++
 			}
-			w.log.Info("upserted schema tables", "schema", schemaFQN, "tables", len(schema.Tables))
+			w.log.Info("upserted schema tables", "schema", schemaFQN, "tables", upserted)
 		}
 	}
 
