@@ -7,10 +7,10 @@ import (
 
 	"github.com/open-metadata/openmetadata-sdk/openmetadata-go-client/pkg/ometa"
 
-	"github.com/zerodha/openmetadata-ingestion-go/internal/config"
-	"github.com/zerodha/openmetadata-ingestion-go/internal/fqn"
-	"github.com/zerodha/openmetadata-ingestion-go/internal/model"
-	"github.com/zerodha/openmetadata-ingestion-go/internal/typemap"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/config"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/fqn"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/model"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/typemap"
 )
 
 // serviceTypes maps our model service type to the SDK's CreateDatabaseService enum.

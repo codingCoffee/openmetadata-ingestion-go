@@ -9,8 +9,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/zerodha/openmetadata-ingestion-go/internal/config"
-	"github.com/zerodha/openmetadata-ingestion-go/internal/model"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/config"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/model"
 )
 
 // Source extracts metadata from a single database service.

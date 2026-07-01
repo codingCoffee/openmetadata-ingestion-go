@@ -14,10 +14,10 @@ import (
 
 	_ "github.com/ClickHouse/clickhouse-go/v2" // register the "clickhouse" database/sql driver
 
-	"github.com/zerodha/openmetadata-ingestion-go/internal/config"
-	"github.com/zerodha/openmetadata-ingestion-go/internal/filter"
-	"github.com/zerodha/openmetadata-ingestion-go/internal/model"
-	"github.com/zerodha/openmetadata-ingestion-go/internal/source"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/config"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/filter"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/model"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/source"
 )
 
 const defaultDatabase = "default"

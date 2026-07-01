@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/zerodha/openmetadata-ingestion-go/internal/sink"
-	"github.com/zerodha/openmetadata-ingestion-go/internal/source"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/sink"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/source"
 )
 
 // Workflow couples a source and a sink.

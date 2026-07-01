@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/zerodha/openmetadata-ingestion-go/internal/model"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/model"
 )
 
 // fakeSource returns a fixed service tree.

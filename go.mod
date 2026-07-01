@@ -1,4 +1,4 @@
-module github.com/zerodha/openmetadata-ingestion-go
+module github.com/codingcoffee/openmetadata-ingestion-go
 
 go 1.25.0
 

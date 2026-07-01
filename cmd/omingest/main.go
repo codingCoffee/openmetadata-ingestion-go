@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/zerodha/openmetadata-ingestion-go/internal/cli"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/cli"
 )
 
 func main() {

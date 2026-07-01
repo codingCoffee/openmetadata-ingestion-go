@@ -10,10 +10,10 @@ import (
 
 	_ "github.com/jackc/pgx/v5/stdlib" // register the "pgx" database/sql driver
 
-	"github.com/zerodha/openmetadata-ingestion-go/internal/config"
-	"github.com/zerodha/openmetadata-ingestion-go/internal/filter"
-	"github.com/zerodha/openmetadata-ingestion-go/internal/model"
-	"github.com/zerodha/openmetadata-ingestion-go/internal/source"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/config"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/filter"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/model"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/source"
 )
 
 func init() {

@@ -6,16 +6,16 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/zerodha/openmetadata-ingestion-go/internal/config"
-	"github.com/zerodha/openmetadata-ingestion-go/internal/logging"
-	"github.com/zerodha/openmetadata-ingestion-go/internal/sink"
-	"github.com/zerodha/openmetadata-ingestion-go/internal/source"
-	"github.com/zerodha/openmetadata-ingestion-go/internal/workflow"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/config"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/logging"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/sink"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/source"
+	"github.com/codingcoffee/openmetadata-ingestion-go/internal/workflow"
 
 	// Register the supported sources via their package init functions.
-	_ "github.com/zerodha/openmetadata-ingestion-go/internal/source/clickhouse"
-	_ "github.com/zerodha/openmetadata-ingestion-go/internal/source/mysql"
-	_ "github.com/zerodha/openmetadata-ingestion-go/internal/source/postgres"
+	_ "github.com/codingcoffee/openmetadata-ingestion-go/internal/source/clickhouse"
+	_ "github.com/codingcoffee/openmetadata-ingestion-go/internal/source/mysql"
+	_ "github.com/codingcoffee/openmetadata-ingestion-go/internal/source/postgres"
 )
 
 // version is set via -ldflags at build time.
